@@ -13,16 +13,16 @@ h1{
 
 span.open{
   display: block;
-  font-size: 8vw;
-  line-height: 6vw;
+  font-size: min(8vw, 120px);
+  line-height: min(6vw, 120px);
   color: #5ac75d;
 }
 
 
 span.trivia{
   display: block;
-  font-size: 20vw;
-  line-height: 20vw;
+  font-size: min(20vw, 300px);
+  line-height: min(20vw, 230px);
   color: white;
   letter-spacing: 0.2rem;
 
@@ -59,4 +59,3 @@ button.start-button{
 @keyframes hideButton {
   0%, 100%{opacity:0;}
 }
-
