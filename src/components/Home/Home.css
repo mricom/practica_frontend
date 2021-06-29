@@ -1,0 +1,62 @@
+.home-container{
+  display: flex;
+  justify-content: center;
+  position:relative;
+}
+
+h1{
+  position: absolute;
+  text-align: center;
+  top: 20vh;
+  animation: enterTitle 1s;
+}
+
+span.open{
+  display: block;
+  font-size: 8vw;
+  line-height: 6vw;
+  color: #5ac75d;
+}
+
+
+span.trivia{
+  display: block;
+  font-size: 20vw;
+  line-height: 20vw;
+  color: white;
+  letter-spacing: 0.2rem;
+
+}
+
+button.start-button{
+  position: absolute;
+  top: 75vh;
+  animation: fadeIn 1s, hideButton 1s;
+  animation-delay: 1s, 0s;
+  height: 60px;
+  width: 40vh;
+  font-size: 2rem;
+  font-weight: 600;
+  letter-spacing: 0.3rem;
+  background: -prefix-linear-gradient(left top, #179602, #57c244, #6cd959, #8bfa78);
+  background: linear-gradient(to bottom right,#179602,  #57c244, #6cd959, #8bfa78);
+  border-radius: 5px;
+  border: 1px solid #117500;
+  color: white;
+}
+
+
+@keyframes enterTitle {
+  0% { transform: scale(0);}
+  100% { transform: scale(1);}
+}
+
+@keyframes fadeIn {
+  0% {opacity:0;}
+  100% {opacity:1;}
+}
+
+@keyframes hideButton {
+  0%, 100%{opacity:0;}
+}
+
