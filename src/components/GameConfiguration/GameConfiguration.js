@@ -41,8 +41,8 @@ export default function GameConfiguration(){
   }
   
   const handleSubmit = () => {
-    window.localStorage.setItem('category', configuration.category);
-    window.localStorage.setItem('difficulty', configuration.difficulty);
+    window.sessionStorage.setItem('userCategory', JSON.stringify(configuration.category));
+    window.sessionStorage.setItem('userDifficulty', JSON.stringify(configuration.difficulty));
     history.push('/play/');
   }
 
@@ -51,7 +51,9 @@ export default function GameConfiguration(){
       <div className="game-configuration-container">
         <PageTitle classes="game-configuration-title" titleContent="GAME CONFIGURATION"/>
         {loading ? 
-        <ReactLoading type={'spinningBubbles'} color="#5ac75d" />
+        <div className="loader-container">
+          <ReactLoading type={'spinningBubbles'} color="#5ac75d" />
+          </div>
         :
         <>
           <form onSubmit={handleSubmit}>
@@ -68,7 +70,7 @@ export default function GameConfiguration(){
                 {difficulties_choices.map(item => (<option value={item} key={item}>{item}</option>))} 
               </select>
             </label>
-            <button type="submit">PLAY</button>
+            <button className="play" type="submit">PLAY</button>
           </form>
         </>
       }

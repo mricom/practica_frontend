@@ -2,3 +2,11 @@ body{
   background-color: black;
   color: white;
 }
+
+button{
+  background: -prefix-linear-gradient(left top, #179602, #57c244, #6cd959, #8bfa78);
+  background: linear-gradient(to bottom right,#179602,  #57c244, #6cd959, #8bfa78);
+  border-radius: 5px;
+  border: 1px solid #117500;
+  color: white;
+}
