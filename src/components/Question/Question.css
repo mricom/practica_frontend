@@ -1,0 +1,6 @@
+.question-container{
+    background-color: grey;
+    width: min(90vw, 1300px);
+    margin: auto;
+    padding: 1vw;
+}

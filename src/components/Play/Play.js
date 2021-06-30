@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { fetchSessionToken } from '../../App';
-import ReactLoading from "react-loading";
 import { useHistory } from "react-router-dom";
 import Question from '../Question/Question';
+import Loading from '../Loading/Loading';
+import PageTitle from '../PageTitle/PageTitle';
 
 
 export default function Play(){
@@ -32,7 +33,6 @@ export default function Play(){
       const response = axios.get(url)
         .then(res =>{
           const code = res.data.response_code;
-          console.log(res.data.response_code);
           if(code !== 0){
             if(code === 1){
               alert("There are no questions with the selected criteria. Please, change the game configuration.");
@@ -68,13 +68,14 @@ export default function Play(){
 
   return (
     <>
-      <div className="loader-container">
-        <ReactLoading type={'spinningBubbles'} color="#5ac75d" />
-      </div>
-        :
-        <>
-        <Question></Question>
-        </>
+      <PageTitle classes="play-title" titleContent="ENJOY!"/>
+      {loading ? 
+        <Loading />
+          :
+          <>
+            <Question></Question>
+          </>
+        }
     </>
   )
 }
