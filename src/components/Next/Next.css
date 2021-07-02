@@ -1,0 +1,22 @@
+button.next{
+    display: block; 
+    height: 60px;
+    width: min(80vw, 500px);
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: 0.3rem;
+    margin: auto;
+}
+
+button.main-button.exit{
+    display: block; 
+    height: 60px;
+    width: min(80vw, 500px);
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.3rem;
+    margin: 10px auto;
+    background: -prefix-linear-gradient(left top, #474747, #626262, #838383, #a1a1a1);
+    background: linear-gradient(to bottom right,#474747, #626262, #838383, #a1a1a1);
+    border: 1px solid #272727;
+}

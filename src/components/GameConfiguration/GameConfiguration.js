@@ -21,7 +21,7 @@ export default function GameConfiguration(){
 
   useEffect( () => {
     const fetchData = async () => {
-      const fetchData = axios.get('https://opentdb.com/api_category.php')
+      axios.get('https://opentdb.com/api_category.php')
         .then(res=> {
           let finalCategories = [{'id': '0', 'name':'All'}];
           let categories = res.data.trivia_categories.sort((a,b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0));
@@ -57,19 +57,19 @@ export default function GameConfiguration(){
           <>
             <form onSubmit={handleSubmit}>
               <label>
-                Choose a category:
+                <p>Choose a category:</p>
                 <select value={configuration.category} 
                 name="category" onChange={handleChange}> 
                   {categories.map(item => (<option key={item.id} value={item.id}>{item.name}</option>))} 
                 </select>
               </label>
               <label>
-                Choose a difficulty:
+                <p>Choose a difficulty:</p>
                 <select name="difficulty" onChange={handleChange}> 
                   {difficulties_choices.map(item => (<option value={item} key={item}>{item}</option>))} 
                 </select>
               </label>
-              <button className="play" type="submit">PLAY</button>
+              <button className="play main-button" type="submit">PLAY</button>
             </form>
           </>
         }
