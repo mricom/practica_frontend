@@ -3,11 +3,8 @@ import axios from "axios";
 import Loading from "../Loading/Loading";
 import PageTitle from "../PageTitle/PageTitle";
 import QuestionCard from "../QuestionCard/QuestionCard";
-import AnswersCard from "../AnswersCard/AnswersCard";
-import Next from "../Next/Next";
 import "./Play.css";
 import { Redirect } from "react-router";
-import { render } from "react-dom";
 
 function useMounted() {
   const [isMounted, setIsMounted] = useState(false);
@@ -25,7 +22,7 @@ export default function Play(props) {
   const [reloadTrigger, reloadQuestion] = useState(true); //This state just triggers the reload of the question
   const [question, setQuestion] = useState({});
   const [redirectUrl, setRedirectURL] = useState("");
-  const isMounted = useMounted()
+  const isMounted = useMounted();
 
   const userCategory = JSON.parse(
     window.sessionStorage.getItem("userCategory")
@@ -58,8 +55,11 @@ export default function Play(props) {
     },
   };
 
-  const handleOnClick = () => {
+  const handleNextOnClick = () => {
     reloadQuestion((prevstate) => !prevstate);
+  };
+  const handleExitOnClick = () => {
+    setRedirectURL("/");
   };
 
   useEffect(() => {
@@ -80,10 +80,13 @@ export default function Play(props) {
               alert(
                 "There are no questions with the selected criteria. Please, change the game configuration."
               );
+              setRedirectURL('/game-configuration/');
             } else if (code === 3 || code === 4) {
-              alert("There has been a problem with the token.");
+              alert("There has been a problem with the token. Please, try again.");
+              setRedirectURL('/');
             } else {
               alert("An error occurred. Sorry for the inconvenience.");
+              setRedirectURL('/');
             }
           } else {
             let question = res.data.results[0];
@@ -128,7 +131,7 @@ export default function Play(props) {
   };
 
   useEffect(() => {
-    if(isMounted){
+    if (isMounted) {
       console.log(question.choices);
       let choices = [...question.choices];
       console.log(choices);
@@ -146,35 +149,50 @@ export default function Play(props) {
 
   return (
     <>
-      <div className="play">
-        <PageTitle classes="play-title" titleContent="ENJOY!" />
-        {loaded ? (
-          <>
-            <div className="question-container">
-              <QuestionCard question={question.question} />
-              <div className="answers-div">
-                {question.choices.map((item, index) => (
-                  <button
-                    className={"multiple-choice choices ".concat(item.status)}
-                    key={index}
-                    buttonid={index}
-                    value={item.value}
-                    onClick={(event) => {
-                      checkAnswer(event);
-                    }}
-                    disabled={answered ? true : false}
-                  >
-                    {item.value}
-                  </button>
-                ))}
+      {redirectUrl === "" ? (
+        <div className="play">
+          <PageTitle classes="play-title" titleContent="ENJOY!" />
+          {loaded ? (
+            <>
+              <div className="question-container">
+                <QuestionCard question={question.question} />
+                <div className="answers-div">
+                  {question.choices.map((item, index) => (
+                    <button
+                      className={"multiple-choice choices ".concat(item.status)}
+                      key={index}
+                      buttonid={index}
+                      value={item.value}
+                      onClick={(event) => {
+                        checkAnswer(event);
+                      }}
+                      disabled={answered ? true : false}
+                    >
+                      {item.value}
+                    </button>
+                  ))}
+                </div>
               </div>
+            </>
+          ) : (
+            <Loading />
+          )}
+          {answered ? (
+            <div className="next-div">
+              <button className="next main-button" onClick={handleNextOnClick}>
+                NEXT
+              </button>
+              <button className="exit main-button" onClick={handleExitOnClick}>
+                EXIT
+              </button>
             </div>
-          </>
-        ) : (
-          <Loading />
-        )}
-        {answered ? <Next {...propsToSend} /> : <></>}
-      </div>
+          ) : (
+            <></>
+          )}
+        </div>
+      ) : (
+        <Redirect to={redirectUrl} />
+      )}
     </>
   );
 }
