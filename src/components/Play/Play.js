@@ -7,8 +7,10 @@ import "./Play.css";
 import { Redirect } from "react-router";
 
 function useMounted() {
+  /*
+    Custom hook created to check if the component is being mounted or if it has already been mounted. 
+  */
   const [isMounted, setIsMounted] = useState(false);
-
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -43,7 +45,10 @@ export default function Play(props) {
   };
 
   const decode = (text) => {
-    return text.replaceAll(/(&quot;)/g, '"').replaceAll(/(&#039;)/g, "'");
+    return text
+      .replaceAll(/(&quot;)/g, '"')
+      .replaceAll(/(&#039;)/g, "'")
+      .replaceAll(/(&rsquo;)/g, "'");
   };
 
   const propsToSend = {
@@ -80,13 +85,15 @@ export default function Play(props) {
               alert(
                 "There are no questions with the selected criteria. Please, change the game configuration."
               );
-              setRedirectURL('/game-configuration/');
+              setRedirectURL("/game-configuration/");
             } else if (code === 3 || code === 4) {
-              alert("There has been a problem with the token. Please, try again.");
-              setRedirectURL('/');
+              alert(
+                "There has been a problem with the token. Please, try again."
+              );
+              setRedirectURL("/");
             } else {
               alert("An error occurred. Sorry for the inconvenience.");
-              setRedirectURL('/');
+              setRedirectURL("/");
             }
           } else {
             let question = res.data.results[0];
@@ -127,19 +134,15 @@ export default function Play(props) {
   const checkAnswer = (event) => {
     setAnswered(true);
     saveClickedButton(event.target.getAttribute("buttonid"));
-    console.log(event.target.getAttribute("buttonid"));
   };
 
   useEffect(() => {
     if (isMounted) {
-      console.log(question.choices);
       let choices = [...question.choices];
-      console.log(choices);
       for (let i = 0; i < choices.length; i++) {
         if (choices[i].value === question.correctAnswer) {
           choices[i].status = "correct";
         } else if (i === parseInt(clickedButton)) {
-          console.log("incorrect");
           choices[i].status = "incorrect";
         }
       }
@@ -196,105 +199,3 @@ export default function Play(props) {
     </>
   );
 }
-
-//   const propsToSend = {
-//     'nextQuestion': () => {reloadQuestion(prevstate => !prevstate);
-//     },
-//     'exit': () => {setRedirectURL('/');}
-//   }
-
-//   const getNewSessionToken = () => {
-//     props.newSessionToken();
-//   }
-
-//   const sessionToken = props.sessionToken;
-
-//   useEffect( () => {
-//     const fetchQuestion = async () => {
-//       let url = 'https://opentdb.com/api.php?amount=1&token=' + sessionToken
-//       if(userCategory && userCategory !== 0){ url += '&category=' + userCategory}
-//       if(userDifficulty){url += '&difficulty=' + userDifficulty.toLowerCase()}
-//       axios.get(url)
-//         .then(res =>{
-//           const code = res.data.response_code;
-//           if(code !== 0){
-//             if(code === 1){
-//               alert("There are no questions with the selected criteria. Please, change the game configuration.");
-//               setRedirectURL('/game-configuration/');
-//             } else if(code === 3 || code===4){
-//               getNewSessionToken();
-//               reloadQuestion(prevstate => !prevstate);
-//             } else {
-//               alert('An error occurred. Sorry for the inconvenience.');
-//               setRedirectURL('/');
-//             }
-//           } else {
-//             let question = res.data.results[0];
-//             question = renameKey(question, 'correct_answer', 'correctAnswer');
-//             question = renameKey(question, 'incorrect_answers', 'incorrectAnswers');
-//             question.question = decode(question.question);
-//             question.correctAnswer = decode(question.correctAnswer);
-//             let choices = [];
-//             for (const q of question['incorrectAnswers']){
-//               choices.push(decode(q));
-//             }
-//             if(!choices.find(elem => elem===question.correctAnswer)){
-//               choices.push(question.correctAnswer);
-//               choices.sort(() => Math.random() - 0.5);
-//             }
-//             question['choices'] = choices;
-//             delete question['incorrectAnswers'];
-//             setQuestion(question);
-//             setLoaded(true);
-//           }
-//         }).catch(err => {
-//           console.log(err);
-//         })
-//       };
-//       fetchQuestion();
-//   }, [reloadTrigger, reloadTrigger]);
-
-//   useEffect(() => {
-//     if (redirectUrl !== ''){
-//       render(<Redirect to={redirectUrl}/>, document.querySelector('.'))
-//       return () => {
-//         setRedirectURL('');
-//       }
-//     }
-//   }, [redirectUrl])
-
-//   const checkAnswer = (event) => {
-//     const correctAnswer = JSON.parse(window.sessionStorage.getItem('correctAnswer'));
-//     if(event.target.value === correctAnswer){
-//       event.target.classList.add('correct');
-//     } else {
-//       event.target.classList.add('incorrect');
-//     }
-//     document.querySelectorAll('button.choice').forEach(item => {
-//       item.setAttribute("disabled", true);
-//     });
-//     setAnswered(true);
-//   }
-
-// return (
-//   <>
-//     <div className="play">
-//       <PageTitle classes="play-title" titleContent="ENJOY!"/>
-//       {loaded ?
-//         <>
-//           <div className="question-container">
-//             <QuestionCard question={question.question}/>
-//             <AnswersCard choices={question.choices} checkAnswer={() => {checkAnswer()}} />
-//           </div>
-//         </>
-//         :
-//         <Loading />
-//         }
-//       {answered ?
-//         <Next {...propsToSend}/>
-//         :
-//         <></>
-//       }
-//     </div>
-//   </>
-// )

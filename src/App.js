@@ -20,7 +20,6 @@ function App() {
         "https://opentdb.com/api_token.php?command=request"
       );
       setSessionToken(response.data.token);
-      console.log(response.data.token);
     };
     fetchSessionToken();
   }, [sessionTokenReloadTrigger]);
