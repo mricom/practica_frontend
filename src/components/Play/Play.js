@@ -1,80 +1,201 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { fetchSessionToken } from '../../App';
-import ReactLoading from "react-loading";
-import { useHistory } from "react-router-dom";
-import Question from '../Question/Question';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import Loading from "../Loading/Loading";
+import PageTitle from "../PageTitle/PageTitle";
+import QuestionCard from "../QuestionCard/QuestionCard";
+import "./Play.css";
+import { Redirect } from "react-router";
 
+function useMounted() {
+  /*
+    Custom hook created to check if the component is being mounted or if it has already been mounted. 
+  */
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+  return isMounted;
+}
 
-export default function Play(){
-  const history = useHistory();
-  const [loading, setLoading] = useState(true);
-  const userCategory = JSON.parse(window.sessionStorage.getItem('userCategory'));
-  const userDifficulty = JSON.parse(window.sessionStorage.getItem('userDifficulty'));
+export default function Play(props) {
+  const [loaded, setLoaded] = useState(false);
+  const [clickedButton, saveClickedButton] = useState(false);
+  const [answered, setAnswered] = useState(false);
+  const [reloadTrigger, reloadQuestion] = useState(true); //This state just triggers the reload of the question
+  const [question, setQuestion] = useState({});
+  const [redirectUrl, setRedirectURL] = useState("");
+  const isMounted = useMounted();
 
-  
+  const userCategory = JSON.parse(
+    window.sessionStorage.getItem("userCategory")
+  );
+  const userDifficulty = JSON.parse(
+    window.sessionStorage.getItem("userDifficulty")
+  );
+  const sessionToken = props.sessionToken;
+
   const renameKey = (object, oldKey, newKey) => {
-    Object.defineProperty(object, newKey,
-    Object.getOwnPropertyDescriptor(object, oldKey));
+    Object.defineProperty(
+      object,
+      newKey,
+      Object.getOwnPropertyDescriptor(object, oldKey)
+    );
     delete object[oldKey];
     return object;
-  }
+  };
 
-  useEffect( () => {
-    const sessionToken = window.localStorage.getItem('triviaSessionToken');
-    if(!sessionToken){
-      fetchSessionToken();
-    }
-    const fetchData = async () => {
-      let url = 'https://opentdb.com/api.php?amount=1&token=' + sessionToken
-      if(userCategory && userCategory !== 0){ url += '&category=' + userCategory}
-      if(userDifficulty){url += '&difficulty=' + userDifficulty.toLowerCase()}
-      const response = axios.get(url)
-        .then(res =>{
+  const decode = (text) => {
+    return text
+      .replaceAll(/(&quot;)/g, '"')
+      .replaceAll(/(&#039;)/g, "'")
+      .replaceAll(/(&rsquo;)/g, "'");
+  };
+
+  const propsToSend = {
+    nextQuestion: () => {
+      reloadQuestion((prevstate) => !prevstate);
+    },
+    exit: () => {
+      setRedirectURL("/");
+    },
+  };
+
+  const handleNextOnClick = () => {
+    reloadQuestion((prevstate) => !prevstate);
+  };
+  const handleExitOnClick = () => {
+    setRedirectURL("/");
+  };
+
+  useEffect(() => {
+    const fetchQuestion = async () => {
+      let url = "https://opentdb.com/api.php?amount=1&token=" + sessionToken;
+      if (userCategory && userCategory !== 0) {
+        url += "&category=" + userCategory;
+      }
+      if (userDifficulty) {
+        url += "&difficulty=" + userDifficulty.toLowerCase();
+      }
+      axios
+        .get(url)
+        .then((res) => {
           const code = res.data.response_code;
-          console.log(res.data.response_code);
-          if(code !== 0){
-            if(code === 1){
-              alert("There are no questions with the selected criteria. Please, change the game configuration.");
-              history.push('/game-configuration/');
-            } else if(code === 3 || code===4){
-              fetchSessionToken();
-              history.push(history.location);
+          if (code !== 0) {
+            if (code === 1) {
+              alert(
+                "There are no questions with the selected criteria. Please, change the game configuration."
+              );
+              setRedirectURL("/game-configuration/");
+            } else if (code === 3 || code === 4) {
+              alert(
+                "There has been a problem with the token. Please, try again."
+              );
+              setRedirectURL("/");
             } else {
-              alert('An error occurred. Sorry for the inconvenience.');
-              history.push('/');
+              alert("An error occurred. Sorry for the inconvenience.");
+              setRedirectURL("/");
             }
           } else {
             let question = res.data.results[0];
-            question = renameKey(question, 'correct_answer', 'correctAnswer');
-            question = renameKey(question, 'incorrect_answers', 'incorrectAnswers');
-            let choices = question.incorrectAnswers;
-            if(!question.incorrectAnswers.find(elem => elem===question.correctAnswer)){
-              choices.push(question.correctAnswer);
+            question = renameKey(question, "correct_answer", "correctAnswer");
+            question = renameKey(
+              question,
+              "incorrect_answers",
+              "incorrectAnswers"
+            );
+            question.question = decode(question.question);
+            question.correctAnswer = decode(question.correctAnswer);
+            let choices = [];
+            for (const q of question.incorrectAnswers) {
+              choices.push({ value: decode(q), status: "neutral" });
+            }
+            if (!choices.find((elem) => elem === question.correctAnswer)) {
+              choices.push({
+                value: decode(question.correctAnswer),
+                status: "neutral",
+              });
               choices.sort(() => Math.random() - 0.5);
             }
-            for(const prop in question){
-              window.sessionStorage.setItem(prop,JSON.stringify(question[prop]));
-            }
+            question["choices"] = choices;
+            delete question["incorrectAnswers"];
+            setQuestion(question);
+            setLoaded(true);
           }
-        }). finally(function(){
-          setLoading(false);
+        })
+        .catch((err) => {
+          console.log(err);
         });
     };
-    fetchData(); 
-    return () => window.sessionStorage.clear();
-  }, []);
+    fetchQuestion();
+    setAnswered(false);
+    setLoaded(false);
+  }, [reloadTrigger]);
 
+  const checkAnswer = (event) => {
+    setAnswered(true);
+    saveClickedButton(event.target.getAttribute("buttonid"));
+  };
+
+  useEffect(() => {
+    if (isMounted) {
+      let choices = [...question.choices];
+      for (let i = 0; i < choices.length; i++) {
+        if (choices[i].value === question.correctAnswer) {
+          choices[i].status = "correct";
+        } else if (i === parseInt(clickedButton)) {
+          choices[i].status = "incorrect";
+        }
+      }
+      setQuestion((prevState) => ({ ...prevState, choices }));
+    }
+  }, [clickedButton]);
 
   return (
     <>
-      <div className="loader-container">
-        <ReactLoading type={'spinningBubbles'} color="#5ac75d" />
-      </div>
-        :
-        <>
-        <Question></Question>
-        </>
+      {redirectUrl === "" ? (
+        <div className="play">
+          <PageTitle classes="play-title" titleContent="ENJOY!" />
+          {loaded ? (
+            <>
+              <div className="question-container">
+                <QuestionCard question={question.question} />
+                <div className="answers-div">
+                  {question.choices.map((item, index) => (
+                    <button
+                      className={"multiple-choice choices ".concat(item.status)}
+                      key={index}
+                      buttonid={index}
+                      value={item.value}
+                      onClick={(event) => {
+                        checkAnswer(event);
+                      }}
+                      disabled={answered ? true : false}
+                    >
+                      {item.value}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </>
+          ) : (
+            <Loading />
+          )}
+          {answered ? (
+            <div className="next-div">
+              <button className="next main-button" onClick={handleNextOnClick}>
+                NEXT
+              </button>
+              <button className="exit main-button" onClick={handleExitOnClick}>
+                EXIT
+              </button>
+            </div>
+          ) : (
+            <></>
+          )}
+        </div>
+      ) : (
+        <Redirect to={redirectUrl} />
+      )}
     </>
-  )
+  );
 }

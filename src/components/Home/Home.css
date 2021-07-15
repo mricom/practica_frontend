@@ -33,7 +33,7 @@ button.start-button{
   animation: fadeIn 1s, hideButton 1s;
   animation-delay: 1s, 0s;
   height: 60px;
-  width: min(80vw, 300px);
+  width: min(80vw, 500px);
   font-size: 2rem;
   font-weight: 600;
   letter-spacing: 0.3rem;

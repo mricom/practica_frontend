@@ -10,3 +10,9 @@ button{
   border: 1px solid #117500;
   color: white;
 }
+
+button.main-button{
+  background: -prefix-linear-gradient(left top, #1d0296, #5144c2, #5b59d9, #7a78fa);
+  background: linear-gradient(to bottom right,#1d0296, #5144c2, #5b59d9, #7a78fa);
+  border: 1px solid #000d57;
+}
